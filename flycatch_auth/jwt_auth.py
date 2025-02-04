@@ -10,6 +10,7 @@ class AuthCoreJwtConfig:
         self.prefix = prefix
 
 class JWTAuth:
+    """generate and verify jwt token"""
     def __init__(self, config: AuthCoreJwtConfig):
         self.config = config
 

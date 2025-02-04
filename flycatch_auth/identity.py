@@ -1,4 +1,5 @@
 class Identity:
+    """manage user authentication and authorization"""
     def __init__(self, user_id, username, grants):
         self.id = user_id
         self.username = username
