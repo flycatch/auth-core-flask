@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "flycatch_auth"
+version = "0.1.0"
+description = "Authentication package for Flask and FastAPI with JWT support"
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT"
+packages = [{ include = "flycatch_auth" }]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+flask = "^2.1"
+fastapi = "^0.78"
+pyjwt = "^2.4"
+pytest = "^7.0"  # For testing
+
+[tool.poetry.dev-dependencies]
+pytest-cov = "^3.0"  # For coverage reports
+black = "^22.3.0"  # For formatting
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

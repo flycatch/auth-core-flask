@@ -1,6 +1,7 @@
 import jwt
 import datetime
 
+
 class AuthCoreJwtConfig:
     def __init__(self, enable, secret, expiresIn, refresh, prefix):
         self.enable = enable
@@ -21,9 +22,32 @@ class AuthCoreJwtConfig:
             token = token.decode("utf-8")
         return token
 
+    def generate_refresh_token(self, user_data):
+        """Generate JWT refresh token"""
+        print("inside generate_refresh_token")
+        print(user_data)
+        payload = {
+            "sub": user_data["id"],
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
+        }
+        token = jwt.encode(payload, self.secret, algorithm="HS256")
+
+        if isinstance(token, bytes):
+            token = token.decode("utf-8")
+        return token
 
     def verify_token(self, token):
         """Verify JWT token"""
+        try:
+            jwt.decode(token, self.secret, algorithms=["HS256"])
+            return True
+        except jwt.ExpiredSignatureError:
+            return False
+        except jwt.InvalidTokenError:
+            return False
+
+    def verify_refresh_token(self, token):
+        """Verify JWT refresh token"""
         try:
             jwt.decode(token, self.secret, algorithms=["HS256"])
             return True
