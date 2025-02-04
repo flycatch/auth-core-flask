@@ -2,28 +2,32 @@ import jwt
 import datetime
 
 class AuthCoreJwtConfig:
-    def __init__(self, enable=True, secret="secret", expiresIn="1h", refresh=True, prefix="/auth/jwt"):
+    def __init__(self, enable, secret, expiresIn, refresh, prefix):
         self.enable = enable
         self.secret = secret
         self.expiresIn = expiresIn
         self.refresh = refresh
         self.prefix = prefix
 
-class JWTAuth:
-    """generate and verify jwt token"""
-    def __init__(self, config: AuthCoreJwtConfig):
-        self.config = config
-
-    def generate_token(self, user):
+    def generate_token(self, user_data):
+        """Generate JWT token"""
         payload = {
-            "sub": user["id"],
-            "username": user["username"],
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+            "sub": user_data["id"],
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=int(self.expiresIn.replace("h", ""))),
         }
-        return jwt.encode(payload, self.config.secret, algorithm="HS256")
+        token = jwt.encode(payload, self.secret, algorithm="HS256")
+
+        if isinstance(token, bytes):
+            token = token.decode("utf-8")
+        return token
+
 
     def verify_token(self, token):
+        """Verify JWT token"""
         try:
-            return jwt.decode(token, self.config.secret, algorithms=["HS256"])
+            jwt.decode(token, self.secret, algorithms=["HS256"])
+            return True
         except jwt.ExpiredSignatureError:
-            return None
+            return False
+        except jwt.InvalidTokenError:
+            return False
