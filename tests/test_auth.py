@@ -1,7 +1,7 @@
 import pytest
 from flask import Flask, request, jsonify
 from flycatch_auth import Auth, AuthCoreJwtConfig
-
+import jwt
 
 class MockUserService:
     def load_user(self, username: str):
@@ -43,6 +43,25 @@ def app():
             return jsonify({"access_token": access_token, "refresh_token": refresh_token}), 200
         else:
             return jsonify({"message": "Invalid credentials"}), 401
+    @app.route("/auth/jwt/refresh", methods=["POST"])
+    def refresh():
+        refresh_token = request.json.get("refresh_token")
+        if not refresh_token or not auth.jwt.verify_refresh_token(refresh_token):
+            return jsonify({"message": "Invalid refresh token"}), 401
+
+        # Assuming user ID is stored in the token payload
+        decoded_token = jwt.decode(refresh_token, auth.jwt.secret, algorithms=["HS256"])
+        user_id = decoded_token.get("sub")
+
+        # Load user using MockUserService or actual UserService
+        user = auth.user_service.load_user(user_id)
+
+        if user:
+            new_access_token = auth.jwt.generate_token(user)
+            return jsonify({"access_token": new_access_token}), 200
+        else:
+            return jsonify({"message": "User not found"}), 404
+
 
     @app.route("/protected")
     @auth.verify()
