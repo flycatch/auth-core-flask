@@ -4,13 +4,13 @@ Flycatch Auth is a Python authentication package that provides JWT-based authent
 
 ## Features
 
-- **JWT authentication
+- **JWT authentication**:Supports access and refresh tokens with customizable expiry times.
 
-- **Grant-based access control
+- **Grant-based access control**
 
-- **Works with Flask and FastAPI
+- **Works with Flask and FastAPI**
 
-- **Simple integration with existing user services
+- **Simple integration with existing user services**
 
 ## Installation
 
@@ -73,6 +73,7 @@ def protected():
 if __name__ == "__main__":
     app.run(debug=True)
 ```
+This snippet demonstrates how to configure and initialize Auth using MockUserService and JWT-based authentication
 
 ## Configuration Options
 
@@ -86,4 +87,22 @@ jwt_config = {
     "refreshToken": True,  # Enable refresh tokens
     "prefix": "/auth/jwt",  # Prefix for JWT-related routes
 }
+```
+
+### Password Checker
+
+```python
+credential_checker=lambda input, user: input == user["password"],
+```
+
+## License
+
+This project is licensed under the GPL-3.0 License.
+
+---
+
+For more details and advanced use cases, visit the [GitHub repository](#) or contact the project maintainers.
+
+```
+
 ```
