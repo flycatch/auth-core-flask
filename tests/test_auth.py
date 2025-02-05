@@ -43,6 +43,7 @@ def app():
             return jsonify({"access_token": access_token, "refresh_token": refresh_token}), 200
         else:
             return jsonify({"message": "Invalid credentials"}), 401
+        
     @app.route("/auth/jwt/refresh", methods=["POST"])
     def refresh():
         refresh_token = request.json.get("refresh_token")
@@ -77,6 +78,7 @@ def client(app):
 
 
 def test_jwt_token_generation(client):
+    print("inside test_jwt_token_generation")
     response = client.post(
         "/auth/jwt/login", json={"username": "testuser", "password": "password123"})
     assert response.status_code == 200
