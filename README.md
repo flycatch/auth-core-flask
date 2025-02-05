@@ -4,13 +4,13 @@ Flycatch Auth is a Python authentication package that provides JWT-based authent
 
 ## Features
 
-- \*\*JWT authentication
+- **JWT authentication
 
-- \*\*Grant-based access control
+- **Grant-based access control
 
-- \*\*Works with Flask and FastAPI
+- **Works with Flask and FastAPI
 
-- \*\*Simple integration with existing user services
+- **Simple integration with existing user services
 
 ## Installation
 
