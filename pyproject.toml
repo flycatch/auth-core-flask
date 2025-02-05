@@ -7,7 +7,7 @@ license = "MIT"
 packages = [{ include = "flycatch_auth" }]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.11"
 flask = "^2.1"
 fastapi = "^0.78"
 pyjwt = "^2.4"
