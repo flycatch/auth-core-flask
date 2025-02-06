@@ -11,7 +11,6 @@ class FastAPIAuth:
         self.user_service = user_service
         self.credential_checker = credential_checker
         self.jwt = jwt
-        print("HI......... , FastAPIAuth")
     
     async def fastapi_verify(self, request: Request, token: str = Security(security)):
         """Verify JWT token in FastAPI"""

@@ -1,4 +1,5 @@
-from .flask_auth import FlaskAuth
+from typing import Optional
+from .flask_auth import FlaskAuth, Identity
 # from .fastapi_auth import FastAPIAuth
 
 
@@ -16,7 +17,7 @@ class Auth(FlaskAuth):
         """Initialize Auth with Flask"""
         app.auth = self
 
-    def authenticate(self, username, password):
+    def authenticate(self, username: str, password: str)-> Optional[Identity]:
         """Use to authenticate user"""
         user = self.user_service.load_user(username)
         if user and self.credential_checker(password, user["password"]):
