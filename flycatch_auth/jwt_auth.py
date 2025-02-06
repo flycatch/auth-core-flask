@@ -15,6 +15,8 @@ class AuthCoreJwtConfig:
         payload = {
             "sub": user_data["id"],
             "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=int(self.expiresIn.replace("h", ""))),
+            "username": user_data["username"],
+            "grants": user_data["grants"],
         }
         token = jwt.encode(payload, self.secret, algorithm="HS256")
 
@@ -24,8 +26,6 @@ class AuthCoreJwtConfig:
 
     def generate_refresh_token(self, user_data):
         """Generate JWT refresh token"""
-        print("inside generate_refresh_token")
-        print(user_data)
         payload = {
             "sub": user_data["id"],
             "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
@@ -35,6 +35,26 @@ class AuthCoreJwtConfig:
         if isinstance(token, bytes):
             token = token.decode("utf-8")
         return token
+
+    def decode_token(self, token):
+        """Decode JWT token and return user data"""
+        try:
+            decoded = jwt.decode(token, self.secret, algorithms=["HS256"])
+            return decoded  # Return the user data
+        except jwt.ExpiredSignatureError:
+            return None
+        except jwt.InvalidTokenError:
+            return None
+
+    def decode_token(self, token):
+        """Decode JWT token and return user data"""
+        try:
+            decoded = jwt.decode(token, self.secret, algorithms=["HS256"])
+            return decoded  # Return the user data
+        except jwt.ExpiredSignatureError:
+            return None
+        except jwt.InvalidTokenError:
+            return None
 
     def verify_token(self, token):
         """Verify JWT token"""

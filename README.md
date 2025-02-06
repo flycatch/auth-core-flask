@@ -27,16 +27,17 @@ pip install flycatch-auth
 from flask import Flask, request, jsonify
 from flycatch_auth import Auth, AuthCoreJwtConfig
 
-class MockUserService:
-    def load_user(self, username: str):
-        return {
-            "id": "1",
-            "username": "testuser",
-            "password": "password123",
-            "grants": ["read_user"],
-        }
-
 app = Flask(__name__)
+
+class Userservice(IdentityService):
+    def load_user(username: str) -> Identity:
+        user = user_db.get_users()
+        return {
+                "id": "",
+                "username": "",
+                "password": "",
+                "grants": [list(map(lambda user: user.permission.name, users))] # read_user
+                }
 
 auth = Auth(
     user_service=MockUserService(),
@@ -65,14 +66,15 @@ def login():
     refresh_token = auth.jwt.generate_refresh_token(user)
     return jsonify({"access_token": access_token, "refresh_token": refresh_token}), 200
 
-@app.route("/protected")
+@app.route("/me")
 @auth.verify()
-def protected():
+def get_curr_user():
     return jsonify({"message": "Access granted"}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
 ```
+
 This snippet demonstrates how to configure and initialize Auth using MockUserService and JWT-based authentication
 
 ## Configuration Options
