@@ -4,6 +4,7 @@ from starlette.requests import Request
 
 security = HTTPBearer()
 
+
 class FastAPIAuth:
     def __init__(self, user_service, credential_checker, jwt):
         self.user_service = user_service
@@ -14,7 +15,6 @@ class FastAPIAuth:
         """Verify JWT token in FastAPI"""
         if not token.credentials or not self.jwt.verify_token(token.credentials):
             raise HTTPException(status_code=401, detail="Unauthorized")
-
         return self.jwt.verify_token(token.credentials)  # Return user payload
 
     def fastapi_has_grants(self, required_grants):

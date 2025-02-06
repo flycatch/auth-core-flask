@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from functools import wraps
-
+from .flask_middleware import authenticate_request  # Import the middleware function
 
 class FlaskAuth:
     def __init__(self, user_service, credential_checker, jwt):
@@ -10,6 +10,7 @@ class FlaskAuth:
 
     def flask_verify(self, func):
         """Decorator to verify JWT token in Flask"""
+        @wraps(func)
         def wrapper(*args, **kwargs):
             token = request.headers.get("Authorization")
             if not token:
@@ -34,7 +35,6 @@ class FlaskAuth:
             @wraps(func)
             def wrapper(*args, **kwargs):
                 # Check if the user is available in request
-                
                 if not hasattr(request, "user") or not request.user:
                     return jsonify({"error": "Unauthorized"}), 401
 
