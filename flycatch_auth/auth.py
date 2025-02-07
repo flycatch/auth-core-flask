@@ -1,63 +1,71 @@
-from typing import Optional
-from routes.jwt_routes import create_jwt_routes
-from .flask_auth import FlaskAuth
-from .identity import Identity
-# from .fastapi_auth import FastAPIAuth
+import logging
+# from flask_session import Session
+# from authlib.integrations.flask_client import OAuth
+from .model_types import IdentityService, Identity, CredentialChecker
+from .services import AuthCoreJwtConfig, JwtService
+from .routes import create_jwt_routes
+
+logger = logging.getLogger("auth_core")
 
 
-class Auth(FlaskAuth):
-    def __init__(self, user_service, credential_checker, jwt=None):
+class AuthCore:
+    def __init__(self):
+        self.configurations = {}
+        self.app = None
+        self.oauth = None
+
+    def init_app(self, app, user_service: IdentityService, credential_checker: CredentialChecker, jwt: AuthCoreJwtConfig):
+        self.app = app
+        self.jwt = jwt
         self.user_service = user_service
         self.credential_checker = credential_checker
-        self.jwt = jwt
+    
+        if jwt and jwt.enable:
+           JwtService(user_service, credential_checker, jwt)
+           create_jwt_routes(app, jwt, user_service, credential_checker)
 
-        # Initialize FlaskAuth and FastAPIAuth
-        FlaskAuth.__init__(self, user_service, credential_checker, jwt)
-        # FastAPIAuth.__init__(self, user_service, credrintrint(user["password"]) (user["password"]) ential_checker, jwt)
+            
+        # if configurations.get("session", {}).get("enabled", False):
+        #     self.setup_session(app, configurations["session"])
 
-    def init_app(self, app):
-        """Initialize Auth with Flask"""
+        # if configurations.get("google", {}).get("enabled", False):
+        #     self.setup_google_auth(app, configurations["google"])
 
-        app.auth = self
-        create_jwt_routes(self)
+    # def setup_session(self, app, session_config):
+    #     app.config["SESSION_TYPE"] = session_config.get("type", "filesystem")
+    #     app.config["SESSION_PERMANENT"] = session_config.get("permanent", False)
+    #     app.config["SESSION_USE_SIGNER"] = session_config.get("use_signer", True)
+    #     app.config["SESSION_KEY_PREFIX"] = session_config.get("key_prefix", "sess:")
+    #     Session(app)
 
-    def authenticate(self, username: str, password: str) -> Optional[Identity]:
-        """Use to authenticate user"""
-        user = self.user_service.load_user(username)
-        if user and self.credential_checker(password, user["password"]):
-            return user
-        return None
+    # def setup_google_auth(self, app, google_config):
+    #     self.oauth = OAuth(app)
+    #     self.oauth.register(
+    #         "google",
+    #         client_id=google_config["clientID"],
+    #         client_secret=google_config["clientSecret"],
+    #         authorize_url="https://accounts.google.com/o/oauth2/auth",
+    #         authorize_params=None,
+    #         access_token_url="https://accounts.google.com/o/oauth2/token",
+    #         access_token_params=None,
+    #         client_kwargs={"scope": "openid email profile"},
+    #     )
 
-    def login(self, username, password):
-        """Authenticate user and return JWT token"""
-        user = self.authenticate(username, password)
-        if user:
-            access_token = self.jwt.generate_token(user)
-            refresh_token = self.jwt.generate_refresh_token(user)
-            return {"access_token": access_token, "refresh_token": refresh_token}
-        return {"error": "Invalid credentials"}
+    
 
-    def refresh(self, refresh_token: str):
-        """Refresh the access token using a valid refresh token"""
-        user = self.jwt.verify_refresh_token(refresh_token)
-        if user:
-            access_token = self.jwt.generate_token(user)
-            return {"access_token": access_token}
-        return {"error": "Invalid refresh token"}
 
-    def verify(self):
-        """Verify token for Flask or FastAPI"""
-        def wrapper(func):
-            if hasattr(self, 'flask_verify'):
-                return self.flask_verify(func)  # Flask verification
-            elif hasattr(self, 'fastapi_verify'):
-                return self.fastapi_verify(func)  # FastAPI verification
-            return func
-        return wrapper
+    # def verify_google(self):
+    #     def decorator(func):
+    #         @wraps(func)
+    #         def wrapper(*args, **kwargs):
+    #             user = session.get("user")
+    #             if not user:
+    #                 logger.warning("Unauthorized Google OAuth access attempt")
+    #                 return jsonify({"error": "Unauthorized"}), 401
+    #             request.user = user
+    #             return func(*args, **kwargs)
+    #         return wrapper
+    #     return decorator
 
-    def has_grants(self, required_grants):
-        """General method to return the correct grant-based verification"""
-        return {
-            "flask": self.flask_has_grants(required_grants),
-            # "fastapi": self.fastapi_has_grants(required_grants),
-        }
+
+auth = AuthCore()

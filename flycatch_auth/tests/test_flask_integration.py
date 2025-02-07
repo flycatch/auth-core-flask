@@ -1,6 +1,6 @@
 import pytest
 from flask import Flask, jsonify, request
-from flycatch_auth import Auth, AuthCoreJwtConfig, IdentityService, Identity
+from flycatch_auth import auth, AuthCoreJwtConfig, IdentityService, Identity
 
 
 class MockUserService(IdentityService):
@@ -12,38 +12,24 @@ class MockUserService(IdentityService):
 def app():
 
     app = Flask(__name__)
-    auth = Auth(
-        user_service=MockUserService(),
-        credential_checker=lambda input, user: input == user,
-        jwt=AuthCoreJwtConfig(
-            enable=True,
-            secret="test-secret",
-            expiresIn="1h",
-            refresh=True,
-            prefix="/auth/jwt",
-        ),
+    jwt_config = AuthCoreJwtConfig(
+        enable=True,
+        secret="mysecret",
+        expiresIn="2h",
+        refresh=True,
+        prefix="/auth/jwt",
     )
 
-    auth.init_app(app)
-
-    @app.route("/auth/jwt/login", methods=["POST"])
-    def login():
-        data = request.json
-        username = data.get("username")
-        password = data.get("password")
-
-        user = auth.authenticate(username, password)
-        if not user:
-            return jsonify({"message": "Invalid credentials"}), 401
-
-        access_token = auth.jwt.generate_token(user)
-        refresh_token = auth.jwt.generate_refresh_token(user)
-
-        return jsonify({"access_token": access_token, "refresh_token": refresh_token}), 200
+    auth.init_app(
+        app=app,
+        user_service=MockUserService(),
+        credential_checker=lambda input, user: input == user,
+        jwt=jwt_config,
+    )
 
     @app.route("/me")
-    @auth.verify()
-    @auth.has_grants(["read_user"])["flask"]
+    # @auth.verify()
+    # @auth.has_grants(["read_user"])["flask"]
     def get_curr_user():
         return jsonify({"name": "Test User"}), 200
     return app

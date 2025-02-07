@@ -1,6 +1,8 @@
-from .auth import Auth
-from .jwt_auth import AuthCoreJwtConfig
-from .identity import Identity, IdentityService
+from .auth import AuthCore 
+from .model_types import Identity, IdentityService
+from .services import AuthCoreJwtConfig, JwtService
 
-# It will helps to call on top level import these methods
-__all__ = ["Auth", "FlaskAuth","AuthCoreJwtConfig", "Identity", "IdentityService","authenticate_request"]
+auth = AuthCore()
+
+# It enables top-level imports like `from flycatch_auth import auth, AuthCoreJwtConfig, JwtService`
+__all__ = ["auth", "Identity", "IdentityService", "AuthCoreJwtConfig", "JwtService"]
