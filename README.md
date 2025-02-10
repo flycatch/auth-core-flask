@@ -39,19 +39,20 @@ class Userservice(IdentityService):
                 "grants": [list(map(lambda user: user.permission.name, users))] # read_user
                 }
 
-auth = Auth(
-    user_service=MockUserService(),
-    credential_checker=lambda input, user: input == user["password"],
-    jwt=AuthCoreJwtConfig(
-        enable=True,
-        secret="your-secret-key",
-        expiresIn="1h",
-        refresh=True,
-        prefix="/auth/jwt",
-    ),
+jwt_config = AuthCoreJwtConfig(
+    enable=True,
+    secret="mysecret",
+    expiresIn="2h",
+    refresh=True,
+    prefix="/auth/jwt",
 )
 
-auth.init_app(app)
+auth.init_app(
+    app=app,
+    user_service=MockUserService(),
+    credential_checker=lambda input, user: input == user,
+    jwt=jwt_config,
+)
 
 
 @app.route("/me")
