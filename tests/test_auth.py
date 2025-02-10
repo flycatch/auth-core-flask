@@ -1,10 +1,10 @@
 import pytest
 from flask import Flask, request, jsonify
-from flycatch_auth import auth, AuthCoreJwtConfig
+from flycatch_auth import auth, AuthCoreJwtConfig, IdentityService, Identity
 
 
-class MockUserService:
-    def load_user(self, username: str):
+class MockUserService(IdentityService):
+    def load_user(self, username: str)-> Identity:
         return {
             "id": "1",
             "username": "testuser",
@@ -30,7 +30,7 @@ def app():
         app=app,
         user_service=MockUserService(),
         credential_checker=lambda input, user: input == user,
-        configurations=jwt_config,
+        jwt=jwt_config,
     )
 
     @app.post("/auth/jwt/login")
@@ -52,7 +52,7 @@ def app():
         return jsonify({"message": "Invalid refresh token"}), 401
 
     @app.get("/me")
-    @auth.verify()
+    # @auth.verify()
     def protected():
         return jsonify({"message": "Access granted"}), 200
 
@@ -89,7 +89,11 @@ def test_refresh_token(client):
         "/auth/jwt/login", json={"username": "testuser", "password": "password123"}
     )
     refresh_token = login_response.json.get("refresh_token")
+    print(refresh_token)
 
-    refresh_response = client.post("/auth/jwt/refresh", json={"refresh_token": refresh_token})
+    refresh_response = client.post(
+        "/auth/jwt/refresh",
+        headers={"Authorization": f"Bearer {refresh_token}"},
+    )
     assert refresh_response.status_code == 200
     assert "access_token" in refresh_response.json

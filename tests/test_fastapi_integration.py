@@ -1,7 +1,7 @@
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from services import Auth, AuthCoreJwtConfig, IdentityService
+from flycatch_auth import Auth, AuthCoreJwtConfig, IdentityService
 
 class MockIdentityService(IdentityService):
     def load_user(self, username: str):

@@ -53,18 +53,6 @@ auth = Auth(
 
 auth.init_app(app)
 
-@app.route("/auth/jwt/login", methods=["POST"])
-def login():
-    data = request.json
-    username = data.get("username")
-    password = data.get("password")
-    user = auth.authenticate(username, password)
-    if not user:
-        return jsonify({"message": "Invalid credentials"}), 401
-
-    access_token = auth.jwt.generate_token(user)
-    refresh_token = auth.jwt.generate_refresh_token(user)
-    return jsonify({"access_token": access_token, "refresh_token": refresh_token}), 200
 
 @app.route("/me")
 @auth.verify()

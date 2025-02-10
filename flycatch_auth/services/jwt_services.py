@@ -1,9 +1,10 @@
 import jwt
 import datetime
-from typing import Optional
+from typing import Optional, Dict
 from dataclasses import dataclass
-from flycatch_auth.model_types import Identity, IdentityService
-
+from .base import AuthService
+from flycatch_auth.model_types import IdentityService
+from .base import AuthService
 
 @dataclass
 class AuthCoreJwtConfig:
@@ -48,21 +49,24 @@ class AuthCoreJwtConfig:
         return self.decode_token(token) is not None
 
 
-class JwtService:
+
+class JwtAuthService(AuthService):
+    """JWT-based authentication service."""
+
     def __init__(self, user_service: IdentityService, credential_checker, jwt_config: AuthCoreJwtConfig):
         self.user_service = user_service
         self.credential_checker = credential_checker
         self.jwt_config = jwt_config
 
-    def authenticate(self, username: str, password: str) -> Optional[Identity]:
-        """Authenticate user"""
+    def authenticate(self, username: str, password: str) -> Optional[Dict]:
+        """Authenticate user credentials."""
         user = self.user_service.load_user(username)
         if user and self.credential_checker(password, user["password"]):
             return user
         return None
 
-    def login(self, username: str, password: str) -> dict:
-        """Authenticate user and return JWT tokens"""
+    def login(self, username: str, password: str) -> Dict:
+        """Authenticate and return JWT access & refresh tokens."""
         user = self.authenticate(username, password)
         if user:
             return {
@@ -71,8 +75,8 @@ class JwtService:
             }
         return {"error": "Invalid credentials"}
 
-    def refresh(self, refresh_token: str) -> dict:
-        """Refresh access token using a valid refresh token"""
+    def refresh(self, refresh_token: str) -> Dict:
+        """Refresh JWT access token."""
         user_data = self.jwt_config.decode_token(refresh_token)
         if user_data:
             return {"access_token": self.jwt_config.generate_token(user_data)}

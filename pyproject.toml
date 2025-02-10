@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "flycatch_auth"
+version = "0.1.0"
+description = "A Python authentication package for Flask and FastAPI"
+authors = ["flycatch_auth"]
+packages = [{include = "flycatch_auth"}]  # This ensures Poetry detects the package
+
+
+
+[tool.poetry.dependencies]
+python = "^3.12"
+flask = "^3.1.0"
+pyjwt = "^2.10.1"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
