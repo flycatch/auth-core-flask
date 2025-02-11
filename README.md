@@ -25,12 +25,12 @@ pip install flycatch-auth
 ```python
 
 from flask import Flask, request, jsonify
-from flycatch_auth import Auth, AuthCoreJwtConfig
+from flycatch_auth import auth, AuthCoreJwtConfig
 
 app = Flask(__name__)
 
 class Userservice(IdentityService):
-    def load_user(username: str) -> Identity:
+    def load_user(self,username: str) -> Identity:
         user = user_db.get_users()
         return {
                 "id": "",
