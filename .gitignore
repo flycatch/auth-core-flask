@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+dist/
+services/__pycache__/
+services/*.py[cod]
+tests/__pycache__/
+tests/*.py[cod]
+routes/__pycache__/
