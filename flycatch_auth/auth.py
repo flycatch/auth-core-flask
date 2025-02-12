@@ -4,6 +4,7 @@ import logging
 from .model_types import IdentityService, CredentialChecker
 from .services import AuthCoreJwtConfig, JwtAuthService
 from .routes import create_jwt_routes
+from .middleware import verify_request
 logger = logging.getLogger("auth_core")
 
 
@@ -37,6 +38,10 @@ class AuthCore:
             create_jwt_routes(app, jwt, user_service, credential_checker)
 
         return self.auth_service
+
+    def verify(self):
+        """Middleware to verify authentication."""
+        return verify_request(self.auth_service)
 
 
 auth = AuthCore()

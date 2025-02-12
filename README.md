@@ -79,6 +79,19 @@ jwt_config = {
     "prefix": "/auth/jwt",  # Prefix for JWT-related routes
 }
 ```
+### User Service
+
+```python
+class UserService(IdentityService):
+    def load_user(self, username: str)-> Identity:
+        users = users.get_db()
+        return {
+            "id": "1",
+            "username": "testuser",
+            "password": "password123",
+            "grants": ["read_user"],
+        }
+```
 
 ### Password Checker
 
