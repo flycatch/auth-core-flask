@@ -4,7 +4,7 @@ from flycatch_auth import auth, AuthCoreJwtConfig, IdentityService, Identity
 
 
 class MockUserService(IdentityService):
-    def load_user(self, username: str)-> Identity:
+    def load_user(self, username: str) -> Identity:
         return {
             "id": "1",
             "username": "testuser",
@@ -69,15 +69,15 @@ def test_jwt_token_generation(client):
         "/auth/jwt/login", json={"username": "testuser", "password": "password123"}
     )
     assert response.status_code == 200
-    assert "access_token" in response.json
-    assert "refresh_token" in response.json
+    assert "access_token" in response.json.get("data")
+    assert "refresh_token" in response.json.get("data")
 
 
 def test_protected_route_access(client):
     login_response = client.post(
         "/auth/jwt/login", json={"username": "testuser", "password": "password123"}
     )
-    token = login_response.json["access_token"]
+    token = login_response.json["data"]["access_token"]
 
     response = client.get("/me", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
@@ -88,12 +88,12 @@ def test_refresh_token(client):
     login_response = client.post(
         "/auth/jwt/login", json={"username": "testuser", "password": "password123"}
     )
-    refresh_token = login_response.json.get("refresh_token")
+    refresh_token = login_response.json["data"]["refresh_token"]
     print(refresh_token)
 
     refresh_response = client.post(
         "/auth/jwt/refresh",
         headers={"Authorization": f"Bearer {refresh_token}"},
     )
-    assert refresh_response.status_code == 200
-    assert "access_token" in refresh_response.json
+    assert refresh_response.json['code'] == 200
+    assert "access_token" in refresh_response.json['data']

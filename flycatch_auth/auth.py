@@ -12,6 +12,7 @@ class AuthCore:
     def __init__(self):
         self.app = None
         self.jwt = None
+        self.session = None
         self.user_service = None
         self.credential_checker = None
         self.auth_service = None
@@ -29,13 +30,18 @@ class AuthCore:
         self.user_service = user_service
         self.credential_checker = credential_checker
 
-        if jwt and jwt.enable:
+        if jwt and jwt.get("enable"):
             # Initialize JWT authentication service
             self.auth_service = JwtAuthService(
                 user_service, credential_checker, jwt)
 
             # Set up JWT authentication routes
             create_jwt_routes(app, jwt, user_service, credential_checker)
+
+        # if session and session.enable:
+        #     # Initialize session-based authentication service
+        #     self.auth_service = SessionAuthService(
+        #         user_service, credential_checker, session)
 
         return self.auth_service
 

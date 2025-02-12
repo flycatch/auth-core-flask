@@ -84,7 +84,8 @@ jwt_config = {
 ```python
 class UserService(IdentityService):
     def load_user(self, username: str)-> Identity:
-        users = users.get_db()
+        # users = users.get_db()
+        # your logic for implemention
         return {
             "id": "1",
             "username": "testuser",

@@ -2,12 +2,13 @@ from flask import Blueprint, request, jsonify
 import logging
 from ..services import JwtAuthService
 
+
 logger = logging.getLogger(__name__)
 
 
 def create_jwt_routes(app, config, user_service, credential_checker):
     router = Blueprint("jwt_auth", __name__)
-    prefix = config.prefix or "/auth/jwt"
+    prefix = config.get("prefix") or "/auth/jwt"
 
     jwt_auth = JwtAuthService(user_service, credential_checker, config)
 

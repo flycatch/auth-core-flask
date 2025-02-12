@@ -43,14 +43,15 @@ def client(app):
 def test_me_route_with_auth(client):
     login_response = client.post(
         "/auth/jwt/login", json={"username": "testuser", "password": "password123"})
+    print(login_response.json)
 
-    assert login_response.status_code == 200, "Login failed"
+    assert login_response.status_code == 200, "Login successful"
 
-    token = login_response.json.get("access_token")
+    token = login_response.json['data']['access_token']
     assert token, "Token is missing from response"
 
     headers = {"Authorization": f"Bearer {token}"}
     response = client.get("/me", headers=headers)
 
-    assert response.status_code == 200, "Access denied"
+    assert response.status_code == 200, "Access granted"
     assert response.json["name"] == "Test User"

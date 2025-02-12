@@ -1,34 +1,8 @@
 import jwt
 import datetime
 from typing import Optional, Dict
-from dataclasses import dataclass
 from .base import AuthService
-from flycatch_auth.model_types import IdentityService
-from .base import AuthService
-
-
-@dataclass
-class AuthCoreJwtConfig:
-    enable: bool
-    secret: str
-    expiresIn: str
-    refresh: bool
-    prefix: str
-
-    def decode_token(self, token: str) -> Optional[dict]:
-        """Decode JWT token and return user data"""
-        try:
-            return jwt.decode(token, self.secret, algorithms=["HS256"])
-        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-            return None
-
-    def verify_token(self, token: str) -> bool:
-        """Verify JWT token"""
-        return self.decode_token(token) is not None
-
-    def verify_refresh_token(self, token: str) -> bool:
-        """Verify JWT refresh token"""
-        return self.decode_token(token) is not None
+from flycatch_auth.model_types import IdentityService, AuthCoreJwtConfig, api_response
 
 
 class JwtAuthService(AuthService):
@@ -60,30 +34,45 @@ class JwtAuthService(AuthService):
             "type": token_type,
             "exp": expiration,
         }
-        return jwt.encode(payload, self.jwt_config.secret, algorithm="HS256")
+        return jwt.encode(payload, self.jwt_config.get('secret'), algorithm="HS256")
+
+    def decode_token(self, token: str) -> Optional[dict]:
+        """Decode JWT token and return user data"""
+        try:
+            return jwt.decode(token, self.secret, algorithms=["HS256"])
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+            return None
+
+    def verify_token(self, token: str) -> bool:
+        """Verify JWT token"""
+        return self.decode_token(token) is not None
+
+    def verify_refresh_token(self, token: str) -> bool:
+        """Verify JWT refresh token"""
+        return self.decode_token(token) is not None
 
     def login(self, username: str, password: str) -> Dict:
         """Authenticate and return JWT access & refresh tokens."""
         user = self.authenticate(username, password)
         if user:
-            return {
+            return api_response(200, "Login successful", True, {
                 "access_token": self.generate_token(user, "access"),
                 "refresh_token": self.generate_token(user, "refresh"),
-            }
-        return {"error": "Invalid credentials"}
+            })
+        return api_response(401, "Invalid credentials", False)
 
     def refresh(self, refresh_token: str) -> Dict:
         """Refresh JWT access token."""
         try:
             decoded_token = jwt.decode(
-                refresh_token, self.jwt_config.secret, algorithms=["HS256"])
+                refresh_token, self.jwt_config.get('secret'), algorithms=["HS256"])
             if decoded_token.get("type") != "refresh":
                 return {"error": "Invalid token type"}
 
             user = {"id": decoded_token["id"],
                     "username": decoded_token["username"]}
-            return {"access_token": self.generate_token(user, "access")}
+            return api_response(200, "Token refreshed", True, {"access_token": self.generate_token(user, "access"), "refresh_token": self.generate_token(user, "refresh")})
         except jwt.ExpiredSignatureError:
-            return {"error": "Refresh token expired"}
+            return api_response(403, "Refresh token expired", False)
         except jwt.InvalidTokenError:
-            return {"error": "Invalid refresh token"}
+            return api_response(403, "Invalid refresh token", False)

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, TypedDict
+from datetime import datetime
 
 
 class Identity:
@@ -27,6 +28,18 @@ class UserType(TypedDict):
     username: str
     password: str
 
+
+def api_response(code: int, message: str, status: str, data=None):
+    """Format API response."""
+    return {
+        "code": code,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "message": message,
+        "status": status,
+        "data": data or {},
+    }
+
+
 class CredentialChecker:
     def __init__(self):
         pass
@@ -35,3 +48,21 @@ class CredentialChecker:
         """Checks if the provided password matches the stored password."""
         return input_password == user_password
 
+
+class SessionConfig(TypedDict, total=False):
+    session_key: str
+    session_expiration: int
+    enabled: bool
+    prefix: str
+    secret: str
+    resave: bool
+    saveUninitialized: bool
+    cookie: dict
+
+
+class AuthCoreJwtConfig(TypedDict, total=False):
+    enable: bool
+    secret: str
+    expiresIn: str
+    refresh: bool
+    prefix: str
